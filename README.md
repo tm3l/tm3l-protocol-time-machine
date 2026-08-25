@@ -2,7 +2,7 @@
 
 **Interactive visual history of how Internet protocols actually evolved — and why.**
 
-[![Project Status: Under Construction](https://img.shields.io/badge/status-🚧%20under%20construction-yellow.svg)](https://github.com/tm3l/protocol-time-machine)
+[![Project Status: Under Construction](https://img.shields.io/badge/status-🚧%20under%20construction-yellow.svg)](https://github.com/tm3l/tm3l-protocol-time-machine)
 [![Go Version](https://img.shields.io/badge/go-1.23-blue.svg)](https://golang.org)
 [![React Version](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
