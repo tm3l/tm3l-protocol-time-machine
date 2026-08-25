@@ -1,0 +1,280 @@
+openapi: 3.1.0
+info:
+  title: Protocol Time Machine API
+  description: REST API for querying IETF RFC metadata, relationship trees, and protocol evolution graphs.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+paths:
+  /healthz:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: protocol-time-machine
+
+  /rfcs:
+    get:
+      summary: List and search RFCs
+      parameters:
+        - name: query
+          in: query
+          description: Search term matching RFC title, number, or abstract
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: RFC status (e.g. PROPOSED STANDARD, INTERNET STANDARD, INFORMATIONAL, HISTORIC)
+          required: false
+          schema:
+            type: string
+        - name: stream
+          in: query
+          description: RFC stream (e.g. IETF, IRTF, IAB, Independent)
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of matching RFC items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RFCMetadata'
+
+  /rfcs/{rfc_number}:
+    get:
+      summary: Get details for a specific RFC
+      parameters:
+        - name: rfc_number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detailed RFC record with relationship edges
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RFCDetail'
+        '404':
+          description: RFC not found
+
+  /graph/{rfc_number}:
+    get:
+      summary: Get evolution graph / tree for a target RFC
+      parameters:
+        - name: rfc_number
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: depth
+          in: query
+          description: Maximum relationship traversal depth
+          required: false
+          schema:
+            type: integer
+            default: 5
+        - name: include_references
+          in: query
+          description: Include normative and informative references in addition to updates/obsoletes
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Graph structure containing nodes and directed edges
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphResponse'
+
+  /timeline:
+    get:
+      summary: Get milestone timeline of major protocol events
+      parameters:
+        - name: from_year
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1969
+        - name: to_year
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Timeline events ordered chronologically
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEvent'
+
+components:
+  schemas:
+    RFCMetadata:
+      type: object
+      properties:
+        number:
+          type: integer
+          example: 9000
+        title:
+          type: string
+          example: "QUIC: A UDP-Based Multiplexed and Secure Transport"
+        published_at:
+          type: string
+          format: date
+          example: "2021-05-01"
+        status:
+          type: string
+          example: "PROPOSED STANDARD"
+        stream:
+          type: string
+          example: "IETF"
+        area:
+          type: string
+          example: "tsv"
+        wg:
+          type: string
+          example: "quic"
+
+    RFCDetail:
+      allOf:
+        - $ref: '#/components/schemas/RFCMetadata'
+        - type: object
+          properties:
+            abstract:
+              type: string
+            authors:
+              type: array
+              items:
+                type: string
+            obsoletes:
+              type: array
+              items:
+                type: integer
+            obsoleted_by:
+              type: array
+              items:
+                type: integer
+            updates:
+              type: array
+              items:
+                type: integer
+            updated_by:
+              type: array
+              items:
+                type: integer
+            see_also:
+              type: array
+              items:
+                type: string
+
+    GraphNode:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "RFC9000"
+        number:
+          type: integer
+          example: 9000
+        title:
+          type: string
+          example: "QUIC: A UDP-Based Multiplexed and Secure Transport"
+        year:
+          type: integer
+          example: 2021
+        status:
+          type: string
+          example: "PROPOSED STANDARD"
+        category:
+          type: string
+          example: "transport"
+
+    GraphEdge:
+      type: object
+      properties:
+        source:
+          type: string
+          example: "RFC9000"
+        target:
+          type: string
+          example: "RFC793"
+        type:
+          type: string
+          enum: [obsoletes, updates, references, derived_from]
+          example: "derived_from"
+
+    GraphResponse:
+      type: object
+      properties:
+        root_id:
+          type: string
+          example: "RFC9000"
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+
+    TimelineEvent:
+      type: object
+      properties:
+        year:
+          type: integer
+          example: 1981
+        date:
+          type: string
+          example: "1981-09"
+        rfc_number:
+          type: integer
+          example: 793
+        title:
+          type: string
+          example: "Transmission Control Protocol (TCP)"
+        significance:
+          type: string
+          example: "Foundational transport protocol standard replacing NCP."
