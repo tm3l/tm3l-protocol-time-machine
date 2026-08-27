@@ -1,5 +1,5 @@
 # Stage 1: Build Go backend binary
-FROM golang:1.23-alpine AS builder
+FROM golang:1.27-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache git ca-certificates
