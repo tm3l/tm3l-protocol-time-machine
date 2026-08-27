@@ -54,3 +54,4 @@ data/cache/
 data/tmp/
 tmp/
 *.log
+*.tsbuildinfo
