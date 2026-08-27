@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: TM3L Protocol Time Machine API
+  description: Protocol Evolution Chronology, Schema Time-Travel & Historic Diff Engine API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+    description: Local development server
+paths:
+  /api/health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+  /api/v1/protocols:
+    get:
+      summary: List registered protocol timelines (OpenAPI, gRPC/Protobuf, GraphQL)
+      responses:
+        '200':
+          description: Protocols list returned
+  /api/v1/protocols/{id}/timeline:
+    get:
+      summary: Fetch temporal evolution graph for a protocol schema across releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Temporal evolution graph returned
