@@ -66,3 +66,7 @@ Visit `http://localhost:5176` to interact with the protocol timeline.
 
 ## 📚 Documentation
 See [`docs/architecture.md`](docs/architecture.md) for detailed internals.
+
+
+## Documentation
+- [Architecture & Specifications](docs/INDEX.md)
